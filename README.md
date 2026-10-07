@@ -59,6 +59,20 @@ pip install "geosom[interactive]"   # + matplotlib, for the interactive views (m
 pip install "geosom[gpu]"           # + torch, to train on an NVIDIA (CUDA) or Apple Silicon (MPS) GPU
 ```
 
+For Jupyter notebooks (including the examples in `examples/notebooks/`) with interactive views:
+
+```bash
+pip install "geosom[notebooks,interactive]" ipympl
+```
+
+On **Google Colab**, also run this in the first cell so the interactive views display:
+
+```python
+from google.colab import output
+output.enable_custom_widget_manager()
+%matplotlib widget
+```
+
 Training uses a GPU automatically when torch (with CUDA or MPS) or CuPy is installed, and every CPU core otherwise —
 see [GPU and multi-core](#gpu-and-multi-core) below.
 

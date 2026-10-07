@@ -41,6 +41,20 @@ pip install "geosom[interactive]"    # + matplotlib, for the interactive views
 pip install "geosom[gpu]"            # + torch, to train on an NVIDIA (CUDA) or Apple Silicon (MPS) GPU
 ```
 
+For Jupyter notebooks (including the examples in `examples/notebooks/`) with interactive views:
+
+```bash
+pip install "geosom[notebooks,interactive]" ipympl
+```
+
+On **Google Colab**, also run this in the first cell so the interactive views display:
+
+```python
+from google.colab import output
+output.enable_custom_widget_manager()
+%matplotlib widget
+```
+
 Working on this repository: `./setup_env.sh` creates `.venv` in the repository with everything, including your local
 `../GeodesicDome` in editable mode (see the README).
 
