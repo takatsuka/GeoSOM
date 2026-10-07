@@ -30,4 +30,4 @@ Note: `mt` itself is a namespace package (no __init__.py), so this
 distribution installs alongside geodesicdomes and other mt.* libraries.
 """
 
-__version__ = '1.2.0'
+__version__ = '1.2.1'
