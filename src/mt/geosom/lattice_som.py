@@ -53,9 +53,9 @@ class LatticeSOM(SOM):
     def __init__(self, grid, seed=None, backend: str | Backend | None = None):
         super().__init__(grid)
         self.rng = seed if isinstance(seed, np.random.Generator) else np.random.default_rng(seed)
-        self.weights: ndarray | None = None                              # (n_nodes, dim)
+        self.weights: ndarray | None = None  # (n_nodes, dim)
         self.dim: int = 0
-        self.history: list[float] = []                                      # quantisation error per epoch
+        self.history: list[float] = []  # quantisation error per epoch
         self._backend_spec = backend
         self._node_distance: ndarray | None = None
 
@@ -142,7 +142,7 @@ class LatticeSOM(SOM):
             else:
                 eigval, eigvec = np.zeros(x.shape[1]), np.eye(x.shape[1])
             order = np.argsort(eigval)[::-1][:3]
-            axes = eigvec[:, order] * np.sqrt(np.maximum(eigval[order], 0.0))    # (dim, k)
+            axes = eigvec[:, order] * np.sqrt(np.maximum(eigval[order], 0.0))  # (dim, k)
             coords = self.init_coords[:, :axes.shape[1]]
             self._set_weights(mean + coords @ axes[:, :coords.shape[1]].T)
         else:
@@ -176,8 +176,8 @@ class LatticeSOM(SOM):
 
         b = self.backend
         data = _DeviceData(b, x, centre=self.weights.mean(axis=0), rows=b.block_rows(self.n_nodes, 3, len(x)))
-        w = b.asarray(self.weights - data.centre)                          # a device copy, centred
-        pending_qe, s_prev = False, sigma                                  # batch: QE of the last update still owed
+        w = b.asarray(self.weights - data.centre)  # a device copy, centred
+        pending_qe, s_prev = False, sigma  # batch: QE of the last update still owed
 
         for epoch in range(epochs):
             t = epoch / max(epochs - 1, 1)
@@ -221,8 +221,8 @@ class LatticeSOM(SOM):
         n = data.n
         for k, i in enumerate(self.rng.permutation(n)):
             lr = lr0 * (lr1 / lr0) ** ((epoch + k / n) / epochs)
-            xi, mi = data.get(slice(i, i + 1))                               # (1, dim) each
-            delta = (xi - w) * mi if data.has_missing else xi - w            # 0 where the value is missing
+            xi, mi = data.get(slice(i, i + 1))  # (1, dim) each
+            delta = (xi - w) * mi if data.has_missing else xi - w  # 0 where the value is missing
             win = b.argmin(b.sum(delta * delta, axis=1), axis=0)
             d = self.distance.rows(b, win.reshape(1))[0]
             w = w + (b.exp(d * d * c) * lr)[:, None] * delta
@@ -289,7 +289,7 @@ class LatticeSOM(SOM):
         the mean Euclidean distance between the weight vectors along its edges: a U-matrix drawn
         *between* the neurons.
         """
-        w = self.weights[self.faces]                                          # (F, k, dim)
+        w = self.weights[self.faces]  # (F, k, dim)
         return np.linalg.norm(w - np.roll(w, -1, axis=1), axis=2).mean(axis=1)
 
     def face_component_difference(self) -> ndarray:
@@ -298,7 +298,7 @@ class LatticeSOM(SOM):
         mean absolute difference |w_a[k] - w_b[k]| along its edges -- the neighbour distance of
         face_distance(), computed one attribute at a time.
         """
-        w = self.weights[self.faces]                                          # (F, k, dim)
+        w = self.weights[self.faces]  # (F, k, dim)
         return np.abs(w - np.roll(w, -1, axis=1)).mean(axis=1)
 
     def face_component_value(self) -> ndarray:
@@ -355,7 +355,7 @@ class LatticeSOM(SOM):
                 text.append(str(labs[0]))
                 continue
             values, counts = np.unique(np.asarray(labs, dtype=str), return_counts=True)
-            order = np.lexsort((values, -counts))                          # most common first, then by name
+            order = np.lexsort((values, -counts))  # most common first, then by name
             values, counts = values[order], counts[order]
             if mode == 'majority':
                 text.append(str(values[0]))
@@ -396,7 +396,7 @@ class _DeviceData:
     def __init__(self, b: Backend, x: ndarray, centre: ndarray, rows: int):
         self.b = b
         self.n = len(x)
-        mask = ~np.isnan(x)
+        mask = ~np.isnan(x) # True where the value is known, False where it is missing
         self.has_missing = not bool(mask.all())
         self.centre = np.nan_to_num(np.asarray(centre, dtype=float))
         self.x0 = np.where(mask, x - self.centre, 0.0)
@@ -429,9 +429,10 @@ class _WeightTerms:
     def __init__(self, b: Backend, w):
         self.b = b
         self.wt = w.T
-        self.w2 = b.sum(w * w, axis=1)                    # (n,)
-        self.w2t = (w * w).T                              # (dim, n), for samples with missing values
+        self.w2 = b.sum(w * w, axis=1)  # (n,)
+        self.w2t = (w * w).T  # (dim, n), for samples with missing values
 
+    """ missing values are ignored in the squared distance: |x - w|^2 = |x|^2 - 2 x.w + |w|^2, where x and w are vectors."""
     def sq_distances(self, xb, mb):
         b = self.b
         cross = xb @ self.wt
