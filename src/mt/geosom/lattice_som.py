@@ -433,7 +433,7 @@ class _WeightTerms:
         self.w2t = (w * w).T  # (dim, n), for samples with missing values
 
     """ missing values are ignored in the squared distance: |x - w|^2 = |x|^2 - 2 x.w + |w|^2,
-    where x and w are vectors. 
+    where x and w are vectors.
     xb: (m, dim) samples, mb: (m, dim) mask of known values (1.0 = known, 0.0 = missing)
     """
     def sq_distances(self, xb, mb):
